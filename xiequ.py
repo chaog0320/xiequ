@@ -1,65 +1,73 @@
-#!/bin/python
-# -*- coding: utf-8 -*-
 """
-自动更新携趣的IP白名单
-Author： 为了你不敢懈怠
-last_update: 20231201
-
-1.脚本放置在scripts根目录下，新建任务task update_xqwhitelist.py
-2.配置环境变量，携趣白名单菜单查看自己的uid和ukey
-export xiequ_uid='123456'
-export xiequ_ukey='81BE18CA69E491EB473FF60D59123456'
-
+@Auth ： LTX-Name
+@File ：xqip.py
 """
+
 import requests
-import os
 
-# 获取环境变量
-xiequ_uid = os.environ.get("xiequ_uid")
-xiequ_ukey = os.environ.get("xiequ_ukey")
-if xiequ_uid is None:
-    print("环境变量 xiequ_uid 不存在，请设置后重新运行程序")
-    exit()
+# 进入携趣白名单页面，下面接口查看自己的uid和ukey，替换下面的值即可
+uid = 105964
+ukey = "AAE42581AA0F57EC6B601F9DCECD1C9D"
 
-if xiequ_ukey is None:
-    print("环境变量 xiequ_ukey 不存在，请设置后重新运行程序")
-    exit()
 
-def get_public_ip():
-    try:
-        response = requests.get('https://ipinfo.io')
-        data = response.json()
-        return data['ip']
-    except requests.exceptions.RequestException as e:
-        print('获取公网 IP 地址时出错:', str(e))
+def query_exist_ip(uid, ukey):
+    url = f"http://op.xiequ.cn/IpWhiteList.aspx?uid={uid}&ukey={ukey}&act=get"
 
-def get_whitelist_ip():
-    try:
-        url = f'http://op.xiequ.cn/IpWhiteList.aspx?uid={xiequ_uid}&ukey={xiequ_ukey}&act=get'
-        response = requests.get(url)
-        data = response.text
-        return data
-    except requests.exceptions.RequestException as e:
-        print('获取白名单 IP 地址时出错:', str(e))
+    payload = {}
+    headers = {
+        'User-Agent': 'Apifox/1.0.0 (https://apifox.com)',
+        'Accept': '*/*',
+        'Host': 'op.xiequ.cn',
+        'Connection': 'keep-alive'
+    }
 
-# 获取公网 IP 地址
-public_ip = get_public_ip()
-print('当前的公网 IP 地址是:', public_ip)
+    response = requests.request("GET", url, headers=headers, data=payload)
+    response = response.text.split(",")
+    global ip
+    ip = response[0]
+    print(f"当前白名单第一个ip为{ip}")
 
-# 获取白名单 IP 地址
-whitelist_ip = get_whitelist_ip()
-print('当前的白名单 IP 地址是:', whitelist_ip)
 
-# 比较公网 IP 和白名单 IP
-if public_ip and whitelist_ip and public_ip != whitelist_ip:
-    # 添加新 IP 地址
-    add_url = f'http://op.xiequ.cn/IpWhiteList.aspx?uid={xiequ_uid}&ukey={xiequ_ukey}&act=add&ip={public_ip}'
-    add_response = requests.get(add_url)
-    print('添加新 IP 地址:', add_response.text)
+def del_exist_ip(uid, ukey):
+    url = f"http://op.xiequ.cn/IpWhiteList.aspx?uid={uid}&ukey={ukey}&act=del&ip={ip}"
 
-    # 删除旧 IP 地址
-    del_url = f'http://op.xiequ.cn/IpWhiteList.aspx?uid={xiequ_uid}&ukey={xiequ_ukey}&act=del&ip={whitelist_ip}'
-    del_response = requests.get(del_url)
-    print('删除旧 IP 地址:', del_response.text)
-else:
-    print('公网 IP 与白名单 IP 一致，无需进行调整')
+    payload = {}
+    headers = {
+        'User-Agent': 'Apifox/1.0.0 (https://apifox.com)',
+        'Accept': '*/*',
+        'Host': 'op.xiequ.cn',
+        'Connection': 'keep-alive',
+        'Cookie': 'acw_tc=7ae4c3a816868379583228477e4119c2921e7d77ace180c63caf6ccd45'
+    }
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+    print(f"删除白名单第一个ip结果：{response.text}")
+
+
+def query_local_ip(uid, ukey):
+    global ip
+    response = requests.get('https://api.ipify.org/?format=json')
+    ip = response.json()['ip']
+    print(f"本机当前ip为：{ip}")
+
+
+def add_local_ip(uid, ukey):
+    url = f"http://op.xiequ.cn/IpWhiteList.aspx?uid={uid}&ukey={ukey}&act=add&ip={ip}"
+
+    payload = {}
+    headers = {
+        'User-Agent': 'Apifox/1.0.0 (https://apifox.com)',
+        'Accept': '*/*',
+        'Host': 'op.xiequ.cn',
+        'Connection': 'keep-alive'
+    }
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+    r = response.text
+    print(f"添加本机ip进白名单结果:{r}")
+
+
+query_exist_ip(uid, ukey)
+del_exist_ip(uid, ukey)
+query_local_ip(uid, ukey)
+add_local_ip(uid, ukey)
