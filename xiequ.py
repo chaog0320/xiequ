@@ -18,7 +18,7 @@ def delete_all_from_ip_whitelist():
         # 构建请求URL来删除所有规则
 	#写你的携趣删除白名单接口
 	#示例 http://op.xiequ.cn/IpWhiteList.aspx?uid=XXXXX&ukey=XXXXXX&act=del&ip=all
-        url = ''
+        url = 'http://op.xiequ.cn/IpWhiteList.aspx?uid=105964&ukey=AAE42581AA0F57EC6B601F9DCECD1C9D&act=del&ip=all'
 
         # 发送HTTP GET请求
         response = requests.get(url)
@@ -36,7 +36,7 @@ def add_to_ip_whitelist(ip):
         # 构建请求URL来添加新规则
 	#在{ip}前面写上你的添加白名单接口
 	#示例 http://op.xiequ.cn/IpWhiteList.aspx?uid=XXXXX&ukey=XXXXX&act=add&ip={ip}
-        url = f'{ip}'
+        url = 'http://op.xiequ.cn/IpWhiteList.aspx?uid=105964&ukey=AAE42581AA0F57EC6B601F9DCECD1C9D&act=add&ip={ip}'
 
         # 发送HTTP GET请求
         response = requests.get(url)
